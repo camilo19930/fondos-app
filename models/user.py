@@ -9,4 +9,4 @@ class User(BaseModel):
     telefono:str
     fondo_actual:Optional[List[object]] = None
     historico:Optional[List[object]] = None
-    saldo:int
+    saldo: float

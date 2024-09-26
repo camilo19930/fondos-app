@@ -5,5 +5,6 @@ def fundEntity(item) -> dict:
         "category":  item["category"],
         "minimum_amount":  item["minimum_amount"]        
     }
+    
 def fundsEntity(entity) -> list:
     return [fundEntity(item) for item in entity]
