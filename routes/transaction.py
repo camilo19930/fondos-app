@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+from pathlib import Path
 from fastapi import APIRouter, Response, status, HTTPException
 from config.db import conn
 from models.transaction import Transaction
@@ -58,7 +61,7 @@ async def actualizar_fondo_actual(id_usuario: str, fondo: Fund):
         {"_id": ObjectId(id_usuario)},
         {"$push": {"historico": nuevo_fondo_actual}}  # Agregar al array de histórico
     )
-    enviar_correo('edwinbp20@gmail.com','ejecución exitosa','Mensaje de exito' )
+    enviar_correo(usuario['email'], 'ejecución exitosa','Mensaje de exito' )
     return {"mensaje": "Fondo actual y histórico actualizados exitosamente"}
 
 
@@ -104,12 +107,14 @@ async def cancelar_fondo(id_usuario: str, fondo_data: FondoCancelacion):
 
 
 
-def enviar_correo(destinatario: str, asunto: str, mensaje: str):
+def enviar_correo(destinatario: str, asunto: str, mensaje: str):    
+    env_path = Path('.') / '.env'
+    load_dotenv(dotenv_path=env_path)
     # Configuración del servidor SMTP
     smtp_server = "smtp.gmail.com"  # Cambia esto si usas otro proveedor
     smtp_port = 465  # El puerto para TLS
-    remitente = "btgseti@gmail.com"  # Cambia esto a tu correo
-    contrasena = "mson ttyi dwyl brdg"  # Cambia esto a tu contraseña
+    remitente = os.getenv('EMAIL_ADMIN')  # Cambia esto a tu correo
+    contrasena = os.getenv('PASSWORD_ADMIN')  # Cambia esto a tu contraseña
 
     # Crear el objeto MIMEMultipart
     msg = MIMEMultipart()
