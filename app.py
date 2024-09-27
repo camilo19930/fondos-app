@@ -16,7 +16,7 @@ app.include_router(user)
 app.include_router(fund)
 
 origins = [
-    "http://localhost:8000",
+    "http://localhost:5173",
 ]
 app.add_middleware(
     CORSMiddleware,

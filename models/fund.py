@@ -10,6 +10,7 @@ class Fund(BaseModel):
     initial_amount: float
 
 class FondoActual(BaseModel):
+    id: Optional[str] = None
     idFondo: Optional[str] = None
     nombreFondo: Optional[str] = None
     fechaVinculación: Optional[datetime] = None

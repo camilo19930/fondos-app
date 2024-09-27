@@ -3,7 +3,6 @@ from fastapi import APIRouter, Response, status, HTTPException
 from schemas.fund import fundEntity, fundsEntity
 from config.db import conn
 from models.fund import Fund
-from passlib.hash import sha256_crypt
 from bson import ObjectId
 from starlette.status import HTTP_204_NO_CONTENT
 
