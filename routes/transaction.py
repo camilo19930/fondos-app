@@ -24,7 +24,7 @@ async def actualizar_fondo_actual(id_usuario: str, fondo: Fund):
         raise HTTPException(status_code=400, detail="ID de usuario no válido")
     
     # Buscar el usuario por id
-    usuario = conn.local.user.find_one({"_id": ObjectId(id_usuario)})
+    usuario = conn.bd_btg.user.find_one({"_id": ObjectId(id_usuario)})
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
@@ -35,7 +35,7 @@ async def actualizar_fondo_actual(id_usuario: str, fondo: Fund):
     nuevo_saldo = float(usuario['saldo']) - float(fondo.initial_amount)
     
     # Actualizar el saldo del usuario
-    conn.local.user.update_one(
+    conn.bd_btg.user.update_one(
         {"_id": ObjectId(id_usuario)},
         {"$set": {"saldo": nuevo_saldo}}  # Actualizar el campo saldo con el nuevo valor
     )
@@ -50,17 +50,27 @@ async def actualizar_fondo_actual(id_usuario: str, fondo: Fund):
         "montoInicial": fondo.initial_amount,
         "historicoId": str(ObjectId())  # Generar un nuevo ID único para el histórico
     }
+    # Preparar el nuevo historico
+    data_historico = {
+        "idFondo": fondo.id,  # Mantiene el ID existente del fondo
+        "nombreFondo": fondo.name,
+        "fechaVinculación": datetime.now(),
+        "monto": fondo.minimum_amount,
+        "estado": True,
+        "montoInicial": fondo.initial_amount,
+        "historicoId": str(ObjectId())  # Generar un nuevo ID único para el histórico
+    }
     
     # Actualizar el fondo_actual
-    conn.local.user.update_one(
+    conn.bd_btg.user.update_one(
         {"_id": ObjectId(id_usuario)},
         {"$push": {"fondo_actual": nuevo_fondo_actual}}  # Agregar al array de fondo_actual
     )
     
     # Insertar el item en el array de historico
-    conn.local.user.update_one(
+    conn.bd_btg.user.update_one(
         {"_id": ObjectId(id_usuario)},
-        {"$push": {"historico": nuevo_fondo_actual}}  # Agregar al array de histórico
+        {"$push": {"historico": data_historico}}  # Agregar al array de histórico
     )
     
     enviar_correo(usuario['email'], 'ejecución exitosa', 'Mensaje de exito')
@@ -75,7 +85,7 @@ async def cancelar_fondo(id_usuario: str, fondo_data: FondoCancelacion):
         raise HTTPException(status_code=400, detail="ID de usuario no válido")
 
     # Buscar el usuario por ID
-    usuario = conn.local.user.find_one({"_id": ObjectId(id_usuario)})
+    usuario = conn.bd_btg.user.find_one({"_id": ObjectId(id_usuario)})
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
@@ -91,16 +101,17 @@ async def cancelar_fondo(id_usuario: str, fondo_data: FondoCancelacion):
 
     # Cambiar el estado del fondo a False
     fondo_a_cancelar["estado"] = False
+    fondo_a_cancelar["fechaVinculación"] = datetime.now()
     saldo = float(usuario['saldo']) + float(fondo_a_cancelar["monto"])
     print(saldo)
     # Eliminar el fondo específico de fondo_actual
-    conn.local.user.update_one(
+    conn.bd_btg.user.update_one(
         {"_id": ObjectId(id_usuario)},
         {"$pull": {"fondo_actual": {"historicoId": fondo_data.historicoId}},"$set": {"saldo": saldo}}
     )
 
     # Agregar el fondo modificado al array de histórico
-    conn.local.user.update_one(
+    conn.bd_btg.user.update_one(
         {"_id": ObjectId(id_usuario)},
         {"$push": {"historico": fondo_a_cancelar}}
     )

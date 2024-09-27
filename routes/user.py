@@ -12,7 +12,7 @@ user = APIRouter()
 @user.get('/users', tags=["users"])
 def find_all_users():
     try:
-        return usersEntity(conn.local.user.find())
+        return usersEntity(conn.bd_btg.user.find())
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
 
@@ -22,8 +22,8 @@ def create_user(user: User):
         new_user =  dict(user)
         # new_user["password"] = sha256_crypt.encrypt(new_user["password"] )
         del new_user["id"]
-        id = conn.local.user.insert_one(new_user).inserted_id
-        user = conn.local.user.find_one({"_id":id})
+        id = conn.bd_btg.user.insert_one(new_user).inserted_id
+        user = conn.bd_btg.user.find_one({"_id":id})
         return userEntity(user)
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
@@ -31,22 +31,22 @@ def create_user(user: User):
 @user.get('/users/{id}', tags=["users"])
 def find_user(id:str):
     try:
-        return userEntity(conn.local.user.find_one({"_id": ObjectId(id)}))
+        return userEntity(conn.bd_btg.user.find_one({"_id": ObjectId(id)}))
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
 
 @user.put('/users/{id}', tags=["users"])
 def update_user(id:str, user: User):
     try:
-        conn.local.user.find_one_and_update({"_id":ObjectId(id)}, {"$set": dict(user)})
-        return userEntity(conn.local.user.find_one({"_id":ObjectId(id)}))
+        conn.bd_btg.user.find_one_and_update({"_id":ObjectId(id)}, {"$set": dict(user)})
+        return userEntity(conn.bd_btg.user.find_one({"_id":ObjectId(id)}))
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
 
 @user.delete('/users/{id}', status_code=status.HTTP_204_NO_CONTENT, tags=["users"])
 def delete_user(id: str):
     try:
-        userEntity(conn.local.user.find_one_and_delete({"_id": ObjectId(id)}))
+        userEntity(conn.bd_btg.user.find_one_and_delete({"_id": ObjectId(id)}))
         return Response(status_code=HTTP_204_NO_CONTENT)
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
