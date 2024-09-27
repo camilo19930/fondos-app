@@ -8,4 +8,4 @@ class Transaction(BaseModel):
     minimum_amount:float
     
 class FondoCancelacion(BaseModel):
-    idFondo: str
+    historicoId: str

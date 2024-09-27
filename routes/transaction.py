@@ -82,7 +82,7 @@ async def cancelar_fondo(id_usuario: str, fondo_data: FondoCancelacion):
     # Buscar el fondo en fondo_actual que coincida con el idFondo y aún no esté cancelado
     fondo_a_cancelar = None
     for fondo in usuario.get("fondo_actual", []):
-        if fondo["idFondo"] == fondo_data.idFondo and fondo.get("estado", True):
+        if fondo["historicoId"] == fondo_data.historicoId and fondo.get("estado", True):
             fondo_a_cancelar = fondo
             break
     
@@ -96,7 +96,7 @@ async def cancelar_fondo(id_usuario: str, fondo_data: FondoCancelacion):
     # Eliminar el fondo específico de fondo_actual
     conn.local.user.update_one(
         {"_id": ObjectId(id_usuario)},
-        {"$pull": {"fondo_actual": {"idFondo": fondo_data.idFondo}},"$set": {"saldo": saldo}}
+        {"$pull": {"fondo_actual": {"historicoId": fondo_data.historicoId}},"$set": {"saldo": saldo}}
     )
 
     # Agregar el fondo modificado al array de histórico
