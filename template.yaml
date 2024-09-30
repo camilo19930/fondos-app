@@ -15,10 +15,10 @@ Resources:
     Properties:
       FunctionName: FastAPIFunction
       Handler: app.handler  # Nombre del archivo y el handler de Mangum
-      Runtime: python3.12.5  # Reemplaza '3.x' con la versión de Python que estés usando
+      Runtime: python3.12  # Reemplaza '3.x' con la versión de Python que estés usando
       Code:
         S3Bucket: !Ref FastAPIS3Bucket  # Referencia al bucket creado
-        S3Key: aws_lanbda_artifact.zip  # Nombre del archivo ZIP
+        S3Key: aws_lambda_artifact.zip  # Nombre del archivo ZIP
       MemorySize: 128
       Timeout: 10
       Role: !GetAtt LambdaExecutionRole.Arn  # Rol que se usará para la ejecución de la Lambda
@@ -81,8 +81,7 @@ Resources:
       StageName: prod
       MethodSettings:
         - HttpMethod: ANY
-          ResourceId: !Ref FastAPIResource
-          Throttle:
+          # Eliminar ResourceId de aquí, no es válido en MethodSettings
+          Throttle:  # Esto define la configuración de throttle
             BurstLimit: 100
             RateLimit: 50
-
