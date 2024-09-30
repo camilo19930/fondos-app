@@ -2,10 +2,11 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: FastAPI app on AWS Lambda with API Gateway
 
 Resources:
+  # Crear un bucket S3 para almacenar el paquete de la aplicación
   FastAPIS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: btg-fondos-edwin   # Cambia esto por un nombre único para tu bucket
+      BucketName: btg-fondos-edwin  # Cambia esto por un nombre único para tu bucket
       VersioningConfiguration:
         Status: Enabled  # Habilitar versionado opcionalmente
 
@@ -14,10 +15,10 @@ Resources:
     Properties:
       FunctionName: FastAPIFunction
       Handler: app.handler  # Nombre del archivo y el handler de Mangum
-      Runtime: python3.x  # Reemplaza '3.x' con la versión de Python que estés usando
+      Runtime: python3.12.5  # Reemplaza '3.x' con la versión de Python que estés usando
       Code:
         S3Bucket: !Ref FastAPIS3Bucket  # Referencia al bucket creado
-        S3Key: deployment-package.zip  # Nombre del archivo ZIP
+        S3Key: aws_lanbda_artifact.zip  # Nombre del archivo ZIP
       MemorySize: 128
       Timeout: 10
       Role: !GetAtt LambdaExecutionRole.Arn  # Rol que se usará para la ejecución de la Lambda
@@ -49,7 +50,7 @@ Resources:
   FastAPIAPI:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: FastAPI API
+      Name: BTG Admin Funds API
       Description: API for FastAPI application
 
   FastAPIResource:
@@ -57,7 +58,7 @@ Resources:
     Properties:
       ParentId: !GetAtt FastAPIAPI.RootResourceId
       RestApiId: !Ref FastAPIAPI
-      PathPart: fastapi  # Ruta de la API
+      PathPart: v1  # Ruta de la API
 
   FastAPIMethod:
     Type: AWS::ApiGateway::Method
@@ -80,6 +81,8 @@ Resources:
       StageName: prod
       MethodSettings:
         - HttpMethod: ANY
-          Throttle:  # Esto define la configuración de throttle
+          ResourceId: !Ref FastAPIResource
+          Throttle:
             BurstLimit: 100
             RateLimit: 50
+
