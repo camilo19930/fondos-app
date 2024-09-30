@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: FastAPI app on AWS Lambda with API Gateway
+
+Resources:
+  FastAPIS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: btg-fondos-edwin   # Cambia esto por un nombre único para tu bucket
+      VersioningConfiguration:
+        Status: Enabled  # Habilitar versionado opcionalmente
+
+  FastAPIFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: FastAPIFunction
+      Handler: app.handler  # Nombre del archivo y el handler de Mangum
+      Runtime: python3.x  # Reemplaza '3.x' con la versión de Python que estés usando
+      Code:
+        S3Bucket: !Ref FastAPIS3Bucket  # Referencia al bucket creado
+        S3Key: deployment-package.zip  # Nombre del archivo ZIP
+      MemorySize: 128
+      Timeout: 10
+      Role: !GetAtt LambdaExecutionRole.Arn  # Rol que se usará para la ejecución de la Lambda
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaBasicExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - s3:GetObject  # Permiso para obtener el archivo del bucket S3
+                Resource: '*'
+
+  FastAPIAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: FastAPI API
+      Description: API for FastAPI application
+
+  FastAPIResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt FastAPIAPI.RootResourceId
+      RestApiId: !Ref FastAPIAPI
+      PathPart: fastapi  # Ruta de la API
+
+  FastAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: ANY  # Cambia esto si necesitas un método específico (GET, POST, etc.)
+      ResourceId: !Ref FastAPIResource
+      RestApiId: !Ref FastAPIAPI
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations
+          - FunctionArn: !GetAtt FastAPIFunction.Arn
+
+  FastAPIStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref FastAPIAPI
+      StageName: prod
+      MethodSettings:
+        - HttpMethod: ANY
+          Throttle:  # Esto define la configuración de throttle
+            BurstLimit: 100
+            RateLimit: 50

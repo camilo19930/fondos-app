@@ -4,6 +4,7 @@ from routes.transaction import transaction
 from routes.user import user
 from routes.fund import fund
 from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
 
 app = FastAPI(
     title="REST API with FastAPI and MongoDB",
@@ -15,13 +16,12 @@ app.include_router(transaction)
 app.include_router(user)
 app.include_router(fund)
 
-origins = [
-    "http://localhost:5173",
-]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Aceptar solicitudes de cualquier origen
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Aceptar todos los métodos HTTP (GET, POST, etc.)
+    allow_headers=["*"],  # Aceptar todos los encabezados
 )
+
+handler = Mangum(app)  # Crea el handler de Mangum
