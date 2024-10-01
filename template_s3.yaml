@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Recursos  desplegar S3
+
+Resources:
+  # Crear un bucket S3 para almacenar el paquete de la aplicación
+  FastAPIS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: btg-fondos-edwin  # Cambia esto por un nombre único para tu bucket
+      VersioningConfiguration:
+        Status: Enabled  # Habilitar versionado opcionalmente
+
+ 

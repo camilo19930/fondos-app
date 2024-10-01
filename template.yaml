@@ -1,14 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: FastAPI app on AWS Lambda with API Gateway
 
+Parameters: 
+  bucketS3: 
+    Type: String
+
 Resources:
-  # Crear un bucket S3 para almacenar el paquete de la aplicación
-  FastAPIS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: btg-fondos-edwin  # Cambia esto por un nombre único para tu bucket
-      VersioningConfiguration:
-        Status: Enabled  # Habilitar versionado opcionalmente
 
   FastAPIFunction:
     Type: AWS::Lambda::Function
@@ -17,7 +14,7 @@ Resources:
       Handler: app.handler  # Nombre del archivo y el handler de Mangum
       Runtime: python3.12  # Reemplaza '3.x' con la versión de Python que estés usando
       Code:
-        S3Bucket: !Ref FastAPIS3Bucket  # Referencia al bucket creado
+        S3Bucket: !Ref bucketS3  # Referencia al bucket creado
         S3Key: aws_lambda_artifact.zip  # Nombre del archivo ZIP
       MemorySize: 128
       Timeout: 10
@@ -73,15 +70,42 @@ Resources:
         Uri: !Sub
           - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations
           - FunctionArn: !GetAtt FastAPIFunction.Arn
+  Deployment: 
+    Type: 'AWS::ApiGateway::Deployment'
+    DependsOn: FastAPIMethod
+    Properties:
+      RestApiId: !Ref FastAPIAPI
+      Description: My deployment
 
   FastAPIStage:
     Type: AWS::ApiGateway::Stage
     Properties:
       RestApiId: !Ref FastAPIAPI
-      StageName: prod
+      StageName: btg
       MethodSettings:
-        - HttpMethod: ANY
-          # Eliminar ResourceId de aquí, no es válido en MethodSettings
-          Throttle:  # Esto define la configuración de throttle
-            BurstLimit: 100
-            RateLimit: 50
+        - DataTraceEnabled: True
+          HttpMethod: '*'
+          # LogginLevel: INFO
+          MetricsEnabled: True
+          ResourcePath: '/*'
+      DeploymentId: !Ref Deployment
+      Tags: 
+        - Key: "Name"
+          Value: "apigw-stage-btg" 
+
+  LambdaApiGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref FastAPIFunction
+      Principal: apigateway.amazonaws.com
+  
+  GatewayResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+      ResponseType: DEFAULT_4XX
+      RestApiId: !Ref FastAPIAPI
+      StatusCode: '404'
