@@ -12,14 +12,14 @@ user = APIRouter()
 def get_users_db():
     return conn.bd_btg.user
 
-@user.get('/users', tags=["users"])
+@user.get('/users')
 def find_all_users(user_db=Depends(get_users_db)):
     try:
         return usersEntity(user_db.find())
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
 
-@user.post('/users',  tags=["users"])
+@user.post('/users')
 def create_user(user: User, user_db=Depends(get_users_db)):
     try:
         new_user =  dict(user)
@@ -31,14 +31,14 @@ def create_user(user: User, user_db=Depends(get_users_db)):
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
 
-@user.get('/users/{id}', tags=["users"])
+@user.get('/users/{id}')
 def find_user(id:str, user_db=Depends(get_users_db)):
     try:
         return userEntity(user_db.find_one({"_id": ObjectId(id)}))
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
 
-@user.put('/users/{id}', tags=["users"])
+@user.put('/users/{id}')
 def update_user(id:str, user: User, user_db=Depends(get_users_db)):
     try:
         user_db.find_one_and_update({"_id":ObjectId(id)}, {"$set": dict(user)})
@@ -46,7 +46,7 @@ def update_user(id:str, user: User, user_db=Depends(get_users_db)):
     except Exception as error:
         return HTTPException(status_code=500, detail={'error':str(error)})
 
-@user.delete('/users/{id}', status_code=status.HTTP_204_NO_CONTENT, tags=["users"])
+@user.delete('/users/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(id: str, user_db=Depends(get_users_db)):
     try:
         userEntity(user_db.find_one_and_delete({"_id": ObjectId(id)}))

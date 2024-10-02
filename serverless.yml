@@ -30,7 +30,7 @@ functions:
         - models/**
     events:
       - http:
-          path: /v1
+          path: /v1/{proxy+}
           method: ANY
 resources:
   Resources:

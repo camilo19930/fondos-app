@@ -109,7 +109,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/serverless-app-funds-og1/dev/1727835336067-2024-10-02T02:15:36.067Z/serverless-app-funds-og1.zip"
+                "S3Key": "serverless/serverless-app-funds-og1/dev/1727841082567-2024-10-02T03:51:22.567Z/serverless-app-funds-og1.zip"
               },
               "Handler": "app.handler",
               "Runtime": "python3.11",
@@ -133,14 +133,14 @@
               "LambdaExecutionRole"
             ]
           },
-          "AppLambdaVersionVo4mBubD87BoVXYJV8zV199muT53OZgp5gLWmdHdyRI": {
+          "AppLambdaVersionX5KWVfSS6Q1lIWEvO61aOr3NsHOsweuZVkaHDAdyw8I": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AppLambdaFunction"
               },
-              "CodeSha256": "frMF/HERhtbggTE27nOu1Q7HOirFLjJCkej73E61oRc="
+              "CodeSha256": "tkKwJb5PzJIhtl0NSdYUQm4YPd3gz68e3vg+SzhaD8c="
             }
           },
           "ApiGatewayRestApi": {
@@ -170,13 +170,25 @@
               }
             }
           },
-          "ApiGatewayMethodV1Any": {
+          "ApiGatewayResourceV1ProxyVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceV1"
+              },
+              "PathPart": "{proxy+}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodV1ProxyVarAny": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "HttpMethod": "ANY",
               "RequestParameters": {},
               "ResourceId": {
-                "Ref": "ApiGatewayResourceV1"
+                "Ref": "ApiGatewayResourceV1ProxyVar"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -216,7 +228,7 @@
               "AppLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1727835329650": {
+          "ApiGatewayDeployment1727841075621": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -225,7 +237,7 @@
               "StageName": "dev"
             },
             "DependsOn": [
-              "ApiGatewayMethodV1Any"
+              "ApiGatewayMethodV1ProxyVarAny"
             ]
           },
           "AppLambdaPermissionApiGateway": {
@@ -338,7 +350,7 @@
           "AppLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AppLambdaVersionVo4mBubD87BoVXYJV8zV199muT53OZgp5gLWmdHdyRI"
+              "Ref": "AppLambdaVersionX5KWVfSS6Q1lIWEvO61aOr3NsHOsweuZVkaHDAdyw8I"
             },
             "Export": {
               "Name": "sls-serverless-app-funds-og1-dev-AppLambdaFunctionQualifiedArn"
@@ -477,7 +489,7 @@
         "events": [
           {
             "http": {
-              "path": "v1",
+              "path": "v1/{proxy+}",
               "method": "any",
               "integration": "AWS_PROXY"
             }
@@ -487,7 +499,7 @@
         "timeout": 6,
         "runtime": "python3.11",
         "vpc": {},
-        "versionLogicalId": "AppLambdaVersionVo4mBubD87BoVXYJV8zV199muT53OZgp5gLWmdHdyRI"
+        "versionLogicalId": "AppLambdaVersionX5KWVfSS6Q1lIWEvO61aOr3NsHOsweuZVkaHDAdyw8I"
       }
     },
     "resources": {
@@ -542,7 +554,7 @@
         ],
         "artifactsS3KeyDirname": "serverless/serverless-app-funds-og1/dev/code-artifacts",
         "artifact": "C:\\Users\\USUARIO\\OneDrive\\Documentos\\Mis_Repositorios\\python\\FastApi\\fondos-app\\.serverless\\serverless-app-funds-og1.zip",
-        "artifactDirectoryName": "serverless/serverless-app-funds-og1/dev/1727835336067-2024-10-02T02:15:36.067Z"
+        "artifactDirectoryName": "serverless/serverless-app-funds-og1/dev/1727841082567-2024-10-02T03:51:22.567Z"
       },
       "layers": {
         "myLayer": {
@@ -550,7 +562,8 @@
           "description": "My shared libraries layer",
           "package": {
             "artifact": "C:\\Users\\USUARIO\\OneDrive\\Documentos\\Mis_Repositorios\\python\\FastApi\\fondos-app\\.serverless\\myLayer.zip"
-          }
+          },
+          "artifactAlreadyUploaded": true
         }
       },
       "provider": {
@@ -570,7 +583,7 @@
     "artifact": "C:\\Users\\USUARIO\\OneDrive\\Documentos\\Mis_Repositorios\\python\\FastApi\\fondos-app\\.serverless\\serverless-app-funds-og1.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/serverless-app-funds-og1/dev/1727835336067-2024-10-02T02:15:36.067Z",
+    "artifactDirectoryName": "serverless/serverless-app-funds-og1/dev/1727841082567-2024-10-02T03:51:22.567Z",
     "artifact": "serverless-app-funds-og1.zip"
   }
 }

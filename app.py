@@ -12,9 +12,9 @@ app = FastAPI(
     version="0.0.1"
 )
 
-app.include_router(transaction)
-app.include_router(user)
-app.include_router(fund)
+app.include_router(transaction, prefix="/v1")
+app.include_router(user, prefix="/v1")
+app.include_router(fund, prefix="/v1")
 
 app.add_middleware(
     CORSMiddleware,
