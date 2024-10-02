@@ -1,7 +1,13 @@
-service: serverless-app-funds
+service: serverless-app-funds-og1
 
 package:
-  individually: true
+  patterns:
+    - '!layerSourceTarball.tar.gz'
+
+layers:
+  myLayer:
+    path: layers  # Ruta a tu layer
+    description: "My shared libraries layer"
 
 provider:
   name: aws
@@ -10,20 +16,22 @@ provider:
 
 functions:
   app:
-    name: func-funds
+    name: func-funds-og1
     handler: app.handler
     role: LambdaExecutionRole
+    layers:
+      - { Ref: MyLayerLambdaLayer }
     package: 
       include: 
         - app.py
+        - config/**
+        - routes/**
+        - schemas/**
+        - models/**
     events:
       - http:
           path: /v1
           method: ANY
-
-plugins:
-  - serverless-python-requirements
-
 resources:
   Resources:
     LambdaExecutionRole:
@@ -36,7 +44,7 @@ resources:
               Principal:
                 Service: lambda.amazonaws.com
               Action: sts:AssumeRole
-        RoleName: iam-func-funds-og-role
+        RoleName: iam-func-funds-og1-role
         Policies:
           - PolicyName: LambdaExecutionPolicy
             PolicyDocument:

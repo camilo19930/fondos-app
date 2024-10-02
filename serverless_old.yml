@@ -1,0 +1,50 @@
+service: serverless-app-funds
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+
+functions:
+  app:
+    name: func-funds
+    handler: app.handler
+    role: LambdaExecutionRole
+    package: 
+      include: 
+        - app.py
+    events:
+      - http:
+          path: /v1
+          method: ANY
+
+plugins:
+  - serverless-python-requirements
+
+resources:
+  Resources:
+    LambdaExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        RoleName: iam-func-funds-og-role
+        Policies:
+          - PolicyName: LambdaExecutionPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: arn:aws:logs:*:*:*
