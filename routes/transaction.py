@@ -28,6 +28,12 @@ async def actualizar_fondo_actual(id_usuario: str, fondo: Fund):
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
+      # Verificar si el usuario ya está inscrito en este fondo
+    for fondo_actual in usuario.get("fondo_actual", []):
+        if fondo_actual["idFondo"] == fondo.id:
+            raise HTTPException(status_code=400, detail="El usuario ya está inscrito en este fondo")
+    
+    
     # Verificar si el saldo del usuario es suficiente
     if float(fondo.initial_amount) < float(fondo.minimum_amount) or float(usuario['saldo']) < float(fondo.initial_amount):
         raise HTTPException(status_code=400, detail="El saldo del cliente es menor que el saldo mínimo del fondo")
@@ -102,7 +108,7 @@ async def cancelar_fondo(id_usuario: str, fondo_data: FondoCancelacion):
     # Cambiar el estado del fondo a False
     fondo_a_cancelar["estado"] = False
     fondo_a_cancelar["fechaVinculación"] = datetime.now()
-    saldo = float(usuario['saldo']) + float(fondo_a_cancelar["monto"])
+    saldo = float(usuario['saldo']) + float(fondo_a_cancelar["montoInicial"])
     print(saldo)
     # Eliminar el fondo específico de fondo_actual
     conn.bd_btg.user.update_one(
